@@ -1,0 +1,122 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(dplyr)
+```
+
+```{r}
+datos <- mtcars
+```
+
+```{r}
+attach(datos)
+```
+
+```{r}
+datos <- select(datos, -c(am, vs, cyl, gear, carb))
+```
+
+```{r}
+library(GGally)
+```
+
+```{r}
+ggpairs(datos, lower = list(continuous = "smooth"),
+        diag = list(continuous = "bar"), axisLabels = "none")
+```
+
+```{r}
+modelo_parcial <- lm (mpg ~ disp + hp + drat + wt, data = datos)
+```
+
+```{r}
+summary(modelo_parcial)
+```
+
+```{r}
+step(modelo_parcial, direction = "both", trace = 0)
+```
+
+```{r}
+mejor_modelo <- lm(mpg ~ hp + wt, data = datos)
+```
+
+```{r}
+summary(mejor_modelo)
+```
+
+```{r}
+confint(lm(mpg ~ hp + wt, data = datos))
+```
+
+```{r}
+library(ggplot2)
+library(gridExtra)
+```
+
+```{r}
+plot1 <- ggplot(data = datos, aes(hp, mejor_modelo$residuals)) +
+    geom_point() + geom_smooth(color = "firebrick") + geom_hline(yintercept = 0) +
+    theme_bw()
+
+plot2 <- ggplot(data = datos, aes(wt, mejor_modelo$residuals)) +
+    geom_point() + geom_smooth(color = "firebrick") + geom_hline(yintercept = 0) +
+    theme_bw()
+
+grid.arrange(plot1, plot2)
+```
+
+```{r}
+qqnorm(mejor_modelo$residuals)
+qqline(mejor_modelo$residuals)
+```
+
+```{r}
+shapiro.test(mejor_modelo$residuals)
+```
+
+```{r}
+ggplot(data = datos, aes(mejor_modelo$fitted.values, mejor_modelo$residuals)) +
+geom_point() +
+geom_smooth(color = "firebrick", se = FALSE) +
+geom_hline(yintercept = 0) +
+theme_bw()
+```
+
+```{r}
+library(lmtest)
+```
+
+```{r}
+bptest(mejor_modelo)
+```
+
+```{r}
+library(corrplot)
+```
+
+```{r}
+corrplot(cor(dplyr::select(datos, wt, hp)),
+         method = "number", tl.col = "black")
+```
+
+```{r}
+library(car)
+```
+
+```{r}
+vif(mejor_modelo)
+```
+
+```{r}
+library(car)
+dwt(mejor_modelo, alternative = "two.sided")
+```
+
+```{r}
+
+```
+
